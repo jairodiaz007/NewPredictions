@@ -1,4 +1,5 @@
 # --- https://cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn
+from flask import Flask, jsonify
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,6 +22,9 @@ from skforecast.model_selection import backtesting_forecaster
 from skforecast.utils import save_forecaster
 from skforecast.utils import load_forecaster
 import shap
+
+app = Flask(__name__)
+
 path='E:/Job/ventas_ANDI_Complete_Hist_Just_MonturaCD.xlsx'
 datos=pd.read_excel(path, sheet_name='Sheet1',usecols=['fecha','Tot_Bill'])
 datos.dropna(subset=['Tot_Bill'],inplace=True)
@@ -39,3 +43,10 @@ datos_train = datos[:-steps]
 datos_test  = datos[-steps2:]
 print(f"Fechas train : {datos_train.index.min()} --- {datos_train.index.max()}  (n={len(datos_train)})")
 print(f"Fechas test  : {datos_test.index.min()} --- {datos_test.index.max()}  (n={len(datos_test)})")
+
+@app.route('/data')
+def send_data():
+    return jsonify({'data1': datos_train.to_dict(orient='records'), 'data2': datos_test.to_dict(orient='records')})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
